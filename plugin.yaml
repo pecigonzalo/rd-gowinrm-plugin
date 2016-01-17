@@ -1,5 +1,5 @@
 name: rd-gowinrm-plugin
-version: 0.1.0
+version: 0.2.0
 rundeckPluginVersion: 1.0
 author: Gonzalo Peci
 date: 15.01.2016
@@ -10,17 +10,9 @@ providers:
     service: NodeExecutor
     plugin-type: script
     script-file: go_winrm_exec
-#    script-args: ${config.realm} ${config.username} ${config.password} ${node.hostname} ${exec.command}
+    script-args: -hostname ${node.hostname} -username ${config.username} -password ${config.password} -port ${config.winrmport} ${exec.command}
     interpreter-args-quoted: true
     config:
-      - name: krb5_realm
-        title: Kerberos Realm
-        type: String
-        required: false
-        description: "Kerberos Realm FQDN in capital letters"
-        scope: Instance
-        renderingOptions:
-          instance-scope-node-attribute: "krb5_realm"
       - name: user
         title: Username
         description: "Username in DOMAIN\\name form"
@@ -39,16 +31,6 @@ providers:
           displayType: PASSWORD
           selectionAccessor: STORAGE_PATH
           instance-scope-node-attribute: "winrm-password-storage-path"
-      - name: authtype
-        title: Auth type
-        description: "Autentification type"
-        type: Select
-        values: "kerberos, plaintext, ssl"
-        default: "plaintext"
-        required: true
-        scope: Instance
-        renderingOptions:
-          instance-scope-node-attribute: "authtype"
       - name: allowoverride
         title: Allow Override
         description: "Gives possibility to override hostname, username (and password) in job options"
@@ -72,7 +54,7 @@ providers:
         title: Shell
         description: "Windows interpreter"
         type: Select
-        values: "cmd, powershell, wql"
+        values: "cmd, powershell"
         default: 'powershell'
         required: true
         scope: Instance
@@ -91,43 +73,26 @@ providers:
     service: FileCopier
     plugin-type: script
     script-file: go_winrm_cp
-    script-args: ${node.hostname} ${file-copy.file} ${file-copy.destination}
+    script-args: -hostname ${node.hostname} -username ${config.username} -password ${config.password} -port ${config.winrmport} ${file-copy.file} ${file-copy.destination}
     config:
-      - name: krb5_realm
-        title: Kerberos Realm
-        type: String
-        required: false
-        description: "Kerberos Realm FQDN in capital letters"
-        scope: Instance
-        renderingOptions:
-          instance-scope-node-attribute: "krb5_realm"
       - name: user
         title: Username
+        description: "Username in DOMAIN\\name form"
         type: String
         required: false
-        description: "Username in DOMAIN\\name form"
         scope: Instance
         renderingOptions:
           instance-scope-node-attribute: "user"
       - name: pass
         title: Password
+        description: `Path to the Password to use within Rundeck Storage. E.g. "keys/path/my.password". Can be overridden by a Node attribute named 'winrm-password-storage-path'.`
         type: String
         required: false
-        description: "Password"
         scope: Instance
         renderingOptions:
           displayType: PASSWORD
           selectionAccessor: STORAGE_PATH
-      - name: authtype
-        title: Auth type
-        description: "Autentification type"
-        type: Select
-        values: "kerberos, plaintext, ssl"
-        default: "plaintext"
-        required: true
-        scope: Instance
-        renderingOptions:
-          instance-scope-node-attribute: "authtype"
+          instance-scope-node-attribute: "winrm-password-storage-path"
       - name: allowoverride
         title: Allow Override
         description: "Gives possibility to override hostname, username (and password) in job options"
@@ -149,9 +114,9 @@ providers:
           instance-scope-node-attribute: "winrmport"
       - name: shell
         title: Shell
-        description: "Windows interpreter. Should be same as in Executor"
+        description: "Windows interpreter"
         type: Select
-        values: "cmd, powershell, wql"
+        values: "cmd, powershell"
         default: 'powershell'
         required: true
         scope: Instance
@@ -165,4 +130,3 @@ providers:
         scope: Instance
         renderingOptions:
           instance-scope-node-attribute: "winrmtimeout"
-
